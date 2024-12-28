@@ -9,6 +9,10 @@ type UserApp interface {
 	CreateUser(User) error
 }
 
+type ChessApp interface {
+	CreateGame(initialTime, timeControl int, color string) error
+}
+
 type User struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
@@ -26,4 +30,17 @@ type RegisterUserPayload struct {
 	Username string `json:"username" validate:"required,min=4,max=20"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8,max=64"`
+}
+
+type NewGamePayload struct {
+	GameMode    string `json:"game_mode" validate:"required"`
+	Color       string `json:"color" validate:"required"`
+	InitialTime int    `json:"initial_time" validate:"required"`
+	TimeControl int    `json:"time_control" validate:"required"`
+}
+
+type ErrorMessage struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Status  int    `json:"status"`
 }
