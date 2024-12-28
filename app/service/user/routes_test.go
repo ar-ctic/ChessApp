@@ -1,6 +1,7 @@
 package user
 
 import (
+	"ChessApp/service/auth"
 	"ChessApp/types"
 	"bytes"
 	"encoding/json"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestUserRegister(t *testing.T) {
-	userApp := &mockUserApp{}
+	userApp := &mockUserAppRegister{}
 	handler := NewHandler(userApp)
 
 	register_payloads := []struct {
@@ -192,7 +193,7 @@ func TestUserRegister(t *testing.T) {
 }
 
 func TestUserLogin(t *testing.T) {
-	userApp := &mockUserApp{}
+	userApp := &mockUserAppLogin{}
 	handler := NewHandler(userApp)
 
 	login_payloads := []struct {
@@ -200,14 +201,14 @@ func TestUserLogin(t *testing.T) {
 		Payload  types.LoginUserPayload
 		Expected int
 	}{
-		// {
-		// 	Name: "Valid Login Payload",
-		// 	Payload: types.LoginUserPayload{
-		// 		Username: "testuser",
-		// 		Password: "strongpassword",
-		// 	},
-		// 	Expected: http.StatusOK,
-		// },
+		{
+			Name: "Valid Login Payload",
+			Payload: types.LoginUserPayload{
+				Username: "testuser",
+				Password: "strongpassword",
+			},
+			Expected: http.StatusOK,
+		},
 		{
 			Name: "Empty Username Login Payload",
 			Payload: types.LoginUserPayload{
@@ -299,19 +300,50 @@ func TestUserLogin(t *testing.T) {
 	
 }
 
-type mockUserApp struct{}
+type mockUserAppRegister struct{}
 
-func (m *mockUserApp) GetUserByEmail(email string) (*types.User, error) {
+func (m *mockUserAppRegister) GetUserByEmail(email string) (*types.User, error) {
 
 	return nil, fmt.Errorf("user not found")
 }
-func (m *mockUserApp) GetUserByUsername(username string) (*types.User, error) {
+func (m *mockUserAppRegister) GetUserByUsername(username string) (*types.User, error) {
 	return nil, fmt.Errorf("user not found")
 }
-func (m *mockUserApp) GetUserByID(id string) (*types.User, error) {
+func (m *mockUserAppRegister) GetUserByID(id string) (*types.User, error) {
 	return nil, nil
 }
-func (m *mockUserApp) CreateUser(user types.User) error {
+func (m *mockUserAppRegister) CreateUser(user types.User) error {
 	return nil
 }
 
+type mockUserAppLogin struct{}
+
+func (m *mockUserAppLogin) GetUserByEmail(email string) (*types.User, error) {
+	return nil, nil
+}
+
+func (m *mockUserAppLogin) GetUserByUsername(username string) (*types.User, error) {
+
+	if len(username) < 4 || len(username) > 20 {
+		return nil, fmt.Errorf("error")
+	}
+
+	password, err := auth.HashPassword("strongpassword")
+	if err != nil {
+		return nil, fmt.Errorf("error")
+	}
+	return &types.User{
+		ID: "",
+		Username: username,
+		Email: "",
+		Password: password,
+	}, nil
+}
+
+func (m *mockUserAppLogin) GetUserByID(id string) (*types.User, error) {
+	return nil, nil
+}
+
+func (m *mockUserAppLogin) CreateUser(user types.User) error {
+	return nil
+}
