@@ -2,6 +2,7 @@ package api
 
 import (
 	"ChessApp/service/user"
+	"ChessApp/service/app"
 	"database/sql"
 	"log"
 	"net/http"
@@ -30,6 +31,10 @@ func (s* APIServer) Run() error {
 	userApp := user.NewApp(s.db)
 	userHandler := user.NewHandler(userApp)
 	userHandler.RegisterRoutes(subrouter)
+
+	chessApp := app.NewApp()
+	chessHandler := app.NewHandler(chessApp, userApp)
+	chessHandler.RegisterRoutes(subrouter)
 
 	log.Println("Listening on", s.addr)
 
